@@ -11,7 +11,7 @@ import java.awt.FlowLayout
 import scalation.linalgebra.{MatrixI, VectorI}
 import scala.math.abs
 
-object Image {
+object imageObject {
 
   /*def getBuffImage() returns the buffered image object on the path.*/
   def getBuffImage(path: String): java.awt.image.BufferedImage = {
@@ -101,6 +101,21 @@ object Image {
     resBuffImage
   }
 
+   /*Converts a given matrixI to buffered image*/
+  def toBuffImage(red: MatrixI,green: MatrixI,blue: MatrixI): BufferedImage = {
+    var resBuffImage = new BufferedImage(red.dim2,red.dim1,BufferedImage.TYPE_INT_RGB)
+    for (i <- (0 until red.dim1))
+      for (j <- (0 until red.dim2)){
+        var r = red.apply(i,j)
+        var g = green.apply(i,j)
+        var b = blue.apply(i,j)
+        println(i,j,r,g,b)
+        var color = new Color(r,g,b)
+        resBuffImage.setRGB(j,i,color.getRGB)
+      }
+    resBuffImage
+  }
+
   /*Saves the image to file for a given path and format*/
   def toFile(buffImage: BufferedImage,path: String, format: String): Unit = {
     ImageIO.write(buffImage,format,new File(path))
@@ -137,6 +152,50 @@ object Image {
         bufimg.setRGB(j,i,new Color(red,green,blue).getRGB)
       }
     bufimg
+  }
+
+  /*def laplaceTransform(bufferedImage: BufferedImage): BufferedImage = {
+    val bufimg = bufferedImage
+    val rgbMatrix = getRbgMatrix(bufimg)
+    val redmat = getRed(rgbMatrix)
+    val greenmat = getGreen(rgbMatrix)
+    val bluemat = getBlue(rgbMatrix)
+    var lredmat = new MatrixI(rgbMatrix.dim1,rgbMatrix.dim2)
+    var lbluemat = new MatrixI(rgbMatrix.dim1,rgbMatrix.dim2)
+    var lgreenmat = new MatrixI(rgbMatrix.dim1,rgbMatrix.dim2)
+    for (i <- (1 until rgbMatrix.dim1 -1))
+      for(j <- (1 until rgbMatrix.dim2 -1)){
+        val red = (redmat.apply(i,j) + redmat.apply(i-1,j) + redmat.apply(i+1,j) + redmat.apply(i,j-1)
+          + redmat.apply(i,j+1))/5
+        lredmat.update(i,j,5*(red - redmat.apply(i,j)))
+        val green = (greenmat.apply(i,j) + greenmat.apply(i-1,j) + greenmat.apply(i+1,j)
+          + greenmat.apply(i,j-1) + greenmat.apply(i,j+1))/5
+        lgreenmat.update(i,j,5*(green - greenmat.apply(i,j)))
+        val blue = (bluemat.apply(i,j) + bluemat.apply(i-1,j) + bluemat.apply(i+1,j)
+          + bluemat.apply(i,j-1) + bluemat.apply(i,j+1))/5
+        lbluemat.update(i,j,5*(blue - bluemat.apply(i,j)))
+      }
+    toBuffImage(subAbs(redmat,lredmat),subAbs(greenmat,lgreenmat),subAbs(bluemat,lbluemat))
+  }*/
+//  TODO: Needs to be developed further.
+  def laplaceFilter(bufferedImage: BufferedImage): BufferedImage = {
+    val bufimg = bufferedImage
+    val rgbMatrix = getRbgMatrix(bufimg)
+    var lmat = new MatrixI(rgbMatrix.dim1,rgbMatrix.dim2)
+    for (i <- (1 until rgbMatrix.dim1 -1))
+      for(j <- (1 until rgbMatrix.dim2 -1)) {
+        val ns5 = (rgbMatrix.apply(i, j) + rgbMatrix.apply(i - 1, j) + rgbMatrix.apply(i + 1, j) + rgbMatrix.apply(i, j - 1)
+          + rgbMatrix.apply(i, j + 1)
+          +rgbMatrix.apply(i-1,j-1) + rgbMatrix.apply(i+1,j+1) + rgbMatrix.apply(i-1,j+1) +rgbMatrix.apply(i+1,j-1)) / 9
+        lmat.update(i, j, 9 * (ns5 - rgbMatrix.apply(i, j)))
+      }
+    toBuffImage(rgbMatrix - lmat)
+  }
+
+  def subAbs(mat1: MatrixI,mat2: MatrixI): MatrixI = {
+    val res = new MatrixI(mat1.dim1,mat1.dim2)
+    for(i <- 0 until mat1.dim1; j<- 0 until mat2.dim2) res.update(i,j,abs(mat1.apply(i,j)-mat2.apply(i,j)))
+    res
   }
 
   /*def smoothingMean method is one way of De-Noising the image.
@@ -198,7 +257,7 @@ object Image {
 
   /*def toBW method converts a color image to a black and white image.
   * This method uses the iterative threshold mechanism to obtain a b/w matrix.*/
-  //  TODO: Needs to be developed yet.
+  //  TODO: Needs to be developed further.
   def toBW(rgbMatrix: MatrixI):BufferedImage={
     var bufimg = new BufferedImage(rgbMatrix.dim2,rgbMatrix.dim1,BufferedImage.TYPE_BYTE_BINARY)
     println("Red layer")
@@ -219,7 +278,7 @@ object Image {
   * valeus of the matrix and a new threshold value is calculated for each iteration.
   * This process stops when the difference between the old and new threshold values
   * is less than 5*/
-  def iterTreshold(matrix: MatrixI): MatrixI ={
+   private def iterTreshold(matrix: MatrixI): MatrixI ={
     val max = matrix.max()
     val min = matrix.min()
     var t1 = (max+min)/2
@@ -291,11 +350,13 @@ object Image {
 
 object sampleImageIO extends App{
   //Noisy image path: '/home/vamsi/Downloads/noisy_voc_worst_002.png' || "/home/vamsi/Downloads/balloons_noisy.png"
-  var bufferedImage = Image.getBuffImage("/home/vamsi/Downloads/balloons_noisy.png")
-  var rgbMatrix = Image.getRbgMatrix(bufferedImage)
-  var resBuffImg = Image.toBuffImage(rgbMatrix)
-  Image.displayImage(resBuffImg)
-  var denoising = Image.smoothingMedian(resBuffImg,25)
-  Image.displayImage(resBuffImg)
+  var bufferedImage = imageObject.getBuffImage("/home/vamsi/Downloads/balloons_noisy.png")
+  var rgbMatrix = imageObject.getRbgMatrix(bufferedImage)
+  var resBuffImg = imageObject.toBuffImage(rgbMatrix)
+//  imageObject.displayImage(resBuffImg)
+  var denoising = imageObject.smoothingMedian(resBuffImg,5)
+  //imageObject.displayImage(denoising)
+  var sharpen = imageObject.laplaceFilter(resBuffImg)
+  imageObject.displayImage(sharpen)
 }
 

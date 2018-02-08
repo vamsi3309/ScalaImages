@@ -80,7 +80,7 @@ class Image(path: String) {
   def toMatrix(vec: VectorI,height: Int,width: Int): MatrixI = {
     var matI = new MatrixI(height,width)
     for ( i <- (0 until height))
-        matI.set(i, vec.apply(i * width until (i + 1) * width))
+      matI.set(i, vec.apply(i * width until (i + 1) * width))
     matI
   }
 
@@ -88,7 +88,7 @@ class Image(path: String) {
   def toMatrix(arr: Array[Int],height: Int,width: Int): MatrixI = {
     var x = new MatrixI(height,width)
     for ( i <- 0 until height)
-        x(i) = VectorI(arr.slice(i * width,(i + 1) * width))
+      x(i) = VectorI(arr.slice(i * width,(i + 1) * width))
     x
   }
 
@@ -146,7 +146,7 @@ class Image(path: String) {
     for (i <- (1 until this.height()-1))
       for(j <- (1 until this.width()-1)){
         val red = (redmat.apply(i,j) + redmat.apply(i-1,j) + redmat.apply(i+1,j) + redmat.apply(i,j-1)
-                    + redmat.apply(i,j+1)+redmat.apply(i-1,j-1) + redmat.apply(i+1,j+1) + redmat.apply(i-1,j+1) +redmat.apply(i+1,j-1))/9
+          + redmat.apply(i,j+1)+redmat.apply(i-1,j-1) + redmat.apply(i+1,j+1) + redmat.apply(i-1,j+1) +redmat.apply(i+1,j-1))/9
         val green = (greenmat.apply(i,j) + greenmat.apply(i-1,j) + greenmat.apply(i+1,j)
           + greenmat.apply(i,j-1) + greenmat.apply(i,j+1) +greenmat.apply(i-1,j-1) + greenmat.apply(i+1,j+1) + greenmat.apply(i-1,j+1) +greenmat.apply(i+1,j-1))/9
         val blue = (bluemat.apply(i,j) + bluemat.apply(i-1,j) + bluemat.apply(i+1,j) + bluemat.apply(i,j-1) + bluemat.apply(i,j+1)
@@ -173,7 +173,7 @@ class Image(path: String) {
             redsmooth = redsmooth + redmat.apply(k, l) / 9
             gsmooth = gsmooth + greenmat.apply(k, l) / 9
             bsmooth = bsmooth + bluemat.apply(k, l) / 9
-           // println(redsmooth, gsmooth, bsmooth)
+            // println(redsmooth, gsmooth, bsmooth)
           }
         }
         bufimg.setRGB(j,i,new Color(redsmooth,gsmooth,bsmooth).getRGB)
@@ -206,7 +206,7 @@ class Image(path: String) {
         gsmooth.sort()
         bsmooth.sort()
         bufimg.setRGB(j,i,new Color(redsmooth.apply(redsmooth.dim/2),gsmooth.apply(gsmooth.dim/2),
-                                                                          bsmooth.apply(bsmooth.dim/2)).getRGB)
+          bsmooth.apply(bsmooth.dim/2)).getRGB)
       }
     buffImage = bufimg
   }
@@ -287,13 +287,13 @@ class Image(path: String) {
 
 }
 
-object sampleImageIO extends App{
+object imageIO extends App{
   //Noisy image path: '/home/vamsi/Downloads/noisy_voc_worst_002.png' || "/home/vamsi/Downloads/balloons_noisy.png"
-    val img = new Image("/home/vamsi/Desktop/sample.jpg")
-    val noisyimg = new Image("/home/vamsi/Downloads/kodim23-noise-std51.png")
-    val noisyimg2 = new Image("/home/vamsi/Downloads/balloons_noisy.png")
-    noisyimg2.getRed()
-    noisyimg2.smoothingMedian(5)
-    noisyimg2.displayImage()
+  val img = new Image("/home/vamsi/Desktop/sample.jpg")
+  val noisyimg = new Image("/home/vamsi/Downloads/kodim23-noise-std51.png")
+  val noisyimg2 = new Image("/home/vamsi/Downloads/balloons_noisy.png")
+  noisyimg2.getRed()
+  noisyimg2.smoothingMedian(5)
+  noisyimg2.displayImage()
 }
 
